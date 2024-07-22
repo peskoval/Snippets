@@ -1,8 +1,6 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 <!-- Begin page content -->
- {% block content %}
-<main role="main" class="mt-3 flex-shrink-0">
+{% block content %}
     <div class="container">
         <div class="row">
             <div class="col">
@@ -14,34 +12,15 @@
         <div class="row">
             <div class="col">
                 <form action="" method="post">
-                    <div class="form-group row">
-                        <div class="col-8">
-                            <input type="text" name="name" class="form-control form-control-lg" placeholder="Название сниппета">
+                    {% csrf_token %}
+                        {{ form.as_p }}
+                    <div class="form-group-row">
+                        <div class="col-6">
+                            <input type="submit" class="btn btn-primary btn-block" value="Создать сниппет"/>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-8">
-                            <select class="form-control" name="lang">
-                                <option>Python</option>
-                                <option>C++</option>
-                                <option>JavaScript</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-8">
-                            <textarea cols="96" rows="10" placeholder="Код сниппета"></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-8">
-                            <input type="submit" class="btn btn-primary btn-block" value="Сохранить">
-                        </div>
-                    </div>
-                </form>
-
+                 </form>                
             </div>
         </div>
     </div>
-</main>
-{% endblock %}
+{% endblock  %}

@@ -1,6 +1,9 @@
-from django.http import Http404
+
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect
 from MainApp.models import Snippet
+from django.core.exceptions import ObjectDoesNotExist
+from MainApp.forms import SnippetForm
 
 
 def index_page(request):
@@ -9,16 +12,30 @@ def index_page(request):
 
 
 def add_snippet_page(request):
-    context = {'pagename': 'Добавление нового сниппета'}
-    return render(request, 'pages/add_snippet.html', context)
+    #  создаем пустую форму при запросе get
+    if request.method == "GET":
+        form = SnippetForm()
+        context = {
+            'pagename': 'Добавление нового сниппета',
+            'form': form
+            }
+        return render(request, 'pages/add_snippet.html', context)
+#  получаем данные из формы 
+    if request.method == "POST":
+        form = SnippetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("snippets-list")
+        return render(request,'pages/add_snippet.html',{'form': form})
+       
 
 
 def snippets_page(request):
-    snipps = Snippet.objects.all()
+    snippets = Snippet.objects.all()
     context = {
         'pagename': 'Просмотр сниппетов',
-        'snipps': snipps,
-    }
+        'snippets': snippets,
+        }
     return render(request, 'pages/view_snippets.html', context)
 
 
@@ -33,9 +50,12 @@ def snippet_detail(request, snippet_id):
         return render(request, "pages/snippet_detail.html", context)
 
 
+def delete_snippet(request, snippet_id):
+    if request.method == "POST":
+        form = Snippet.objects.get(id=snippet_id)
+        if form.is_valid():
+            form.delete()
+            return redirect("snippets-list")
+        return render(request, 'pages/delete_snippet.html')
 
 
-# def remove_snippet(request, snippet_id):
-#     Snippet.objects.get(id=snippet_id).delete()
-#     return(render(request, 'pages/snippet_page.html', context))
-# clear or remove??
