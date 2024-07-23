@@ -51,11 +51,40 @@ def snippet_detail(request, snippet_id):
 
 
 def delete_snippet(request, snippet_id):
+    form = Snippet.objects.get(id=snippet_id)
     if request.method == "POST":
-        form = Snippet.objects.get(id=snippet_id)
+        form.delete()
+    return redirect("snippets-list")
+
+
+# def change_snippet(request, snippet_id):
+#     if request.method == "POST":
+#         form = SnippetForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             # url = snippet.get_url()
+#             # return HttpResponse(url)
+#             return redirect("snippets-detail")
+#     return redirect("snippets-list")
+
+
+def change_snippet(request, snippet_id):
+    snippet = Snippet.objects.get(id=snippet_id)
+    if request.method == "POST":
+        form = SnippetForm(request.POST, instance=snippet)
         if form.is_valid():
-            form.delete()
-            return redirect("snippets-list")
-        return render(request, 'pages/delete_snippet.html')
-
-
+            snippet = form.save()
+            snippet.save()
+            return redirect("snippets-detail")
+    else:
+        # form = SnippetForm()
+        # context = {
+        #     'form': form
+        #     }
+        # return render(request, 'pages/view_snippets.html', context)
+        snippets = Snippet.objects.all()
+        context = {
+            'pagename': 'Просмотр сниппетов',
+            'snippets': snippets,
+            }
+        return render(request, 'pages/view_snippets.html', context)
