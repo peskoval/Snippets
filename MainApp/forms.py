@@ -9,8 +9,8 @@ class SnippetForm(ModelForm):
     class Meta:
         model = Snippet
         # Описываем поля, которые будем заполнять в форме
-        fields = ['name', 'lang', 'code']
-        labels = {'name': '', 'lang': "", "code": ""}
+        fields = ['name', 'lang', 'code', 'status']
+        labels = {'name': '', 'lang': "", "code": "", "status": ""}
         widgets = {
           'name': TextInput(attrs={"class":"form-control", "style":'max-width: 300px;', 'placeholder': 'Название сниппета'}),
           'code': Textarea(attrs={
