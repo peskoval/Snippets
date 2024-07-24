@@ -1,22 +1,98 @@
 [
-    {
-        "model": "MainApp.snippet",
-        "pk": 1,
-        "fields": {
-            "name": "Hello world Snippet",
-            "lang": "py",
-            "code": "print(\"Hello world\")",
-            "creation_date": "2024-07-19T17:35:05.119Z"
-        }
-    },
-    {
-        "model": "MainApp.snippet",
-        "pk": 2,
-        "fields": {
-            "name": "Second Snippet",
-            "lang": "py",
-            "code": "print(\"Hello, Students!\")",
-            "creation_date": "2024-07-19T17:37:37.217Z"
-        }
+{
+    "model": "MainApp.snippet",
+    "pk": 6,
+    "fields": {
+        "name": "sixth",
+        "lang": "py",
+        "code": "print()",
+        "creation_date": "2024-07-23T09:04:15.740Z",
+        "user": null,
+        "status": false
     }
-    ]
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 7,
+    "fields": {
+        "name": "yt",
+        "lang": "py",
+        "code": "tk",
+        "creation_date": "2024-07-23T13:05:54.866Z",
+        "user": null,
+        "status": false
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 8,
+    "fields": {
+        "name": "1-1",
+        "lang": "py",
+        "code": "                                                                                                                                                dir()\r\n                                \r\n                                \r\n                                \r\n                                ",
+        "creation_date": "2024-07-23T18:14:44.832Z",
+        "user": 1,
+        "status": true
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 9,
+    "fields": {
+        "name": "private one",
+        "lang": "py",
+        "code": "                                                                        dir()\r\n                                \r\n                                ",
+        "creation_date": "2024-07-24T06:23:37.502Z",
+        "user": 1,
+        "status": false
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 10,
+    "fields": {
+        "name": "public one",
+        "lang": "py",
+        "code": "any()",
+        "creation_date": "2024-07-24T06:24:09.157Z",
+        "user": 1,
+        "status": true
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 11,
+    "fields": {
+        "name": "666",
+        "lang": "py",
+        "code": "'''After all'''",
+        "creation_date": "2024-07-24T13:14:00.301Z",
+        "user": 1,
+        "status": true
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 12,
+    "fields": {
+        "name": "Vovan`s snippet",
+        "lang": "js",
+        "code": "???",
+        "creation_date": "2024-07-24T13:38:24.188Z",
+        "user": 2,
+        "status": true
+    }
+},
+{
+    "model": "MainApp.snippet",
+    "pk": 13,
+    "fields": {
+        "name": "Another Vovan`s snippet",
+        "lang": "html",
+        "code": "???",
+        "creation_date": "2024-07-24T13:38:44.246Z",
+        "user": 2,
+        "status": false
+    }
+}
+]
