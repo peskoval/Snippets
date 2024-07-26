@@ -1,16 +1,28 @@
-from django.http import Http404, HttpResponse
+
+from django.http import Http404, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from MainApp.models import Snippet
 from django.core.exceptions import ObjectDoesNotExist
-from MainApp.forms import SnippetForm
+from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm
 from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'pages/index.html', context)
 
+@login_required
+def my_snippets(request):
+    snippets = Snippet.objects.filter(user=request.user)
+    context = {
+        'pagename': 'Мои сниппетов',
+        'snippets': snippets,
+        }
+    return render(request, 'pages/view_snippets.html', context)
 
+
+@login_required(login_url="home")
 def add_snippet_page(request):
     # Создаем пустую форму при запросе GET
     if request.method == "GET":
@@ -34,7 +46,7 @@ def add_snippet_page(request):
 
 
 def snippets_page(request):
-    snippets = Snippet.objects.filter(status=True)
+    snippets = Snippet.objects.filter(public=True)
     context = {
         'pagename': 'Просмотр сниппетов',
         'snippets': snippets,
@@ -43,11 +55,11 @@ def snippets_page(request):
 
 
 def snippet_detail(request, snippet_id):
-    context = {
-        'pagename': 'Просмотр сниппета',
-    }
+    context = {'pagename': 'Просмотр сниппета'}
     try:
         snippet = Snippet.objects.get(id=snippet_id)
+        form = CommentForm()
+        context = {"form": form}
     except ObjectDoesNotExist:
         return render(request, "pages/errors.html", context | {"error": f"Snippet with id={snippet_id} not found"})
     else:
@@ -56,12 +68,13 @@ def snippet_detail(request, snippet_id):
         return render(request, "pages/snippet_detail.html", context)
 
 
+@login_required
 def snippet_edit(request, snippet_id):
     context = {'pagename': 'Просмотр сниппета'}
     try:
-        snippet = Snippet.objects.get(id=snippet_id)
+        snippet = Snippet.objects.filter(user=request.user).get(id=snippet_id)
     except ObjectDoesNotExist:
-        return Http404
+        raise Http404
     
     # 1 вариант, с помощью SnippetForm
     # if request.method == "GET":
@@ -78,19 +91,20 @@ def snippet_edit(request, snippet_id):
         }
         return render(request, "pages/snippet_detail.html", context)
     
-    # Получаем данных из формы и на их основе обновляем данные сниппета в БД
+    # Получаем данные из формы и на их основе обновляем данные сниппета в БД
     if request.method == "POST":
         data_form = request.POST
         snippet.name = data_form["name"]
         snippet.code = data_form["code"]
-        snippet.status = data_form["status"]
+        snippet.public = data_form.get("public", False)
         snippet.save()
         return redirect("snippets-list")
 
 
+@login_required
 def snippet_delete(request, snippet_id):
     if request.method == "GET" or request.method == "POST":
-        snippet = get_object_or_404(Snippet, id=snippet_id)
+        snippet = get_object_or_404(Snippet.objects.filter(user=request.user), id=snippet_id)
         snippet.delete()
     return redirect("snippets-list")
 
@@ -107,8 +121,8 @@ def login(request):
         else:
             # Return error message
             context = {
-                "pagename": "PyBin",
-                "errors": ['wrong username or password']
+                "pagename": "PythonBin",
+                "errors": ["wrong username or password"]
             }
             return render(request, "pages/index.html", context)
     return redirect('home')
@@ -118,11 +132,34 @@ def logout(request):
     auth.logout(request)
     return redirect('home')
 
+def create_user(request):
+    context = {'pagename': 'Регистрация нового пользователя'}
+    # Создаем пустую форму при запросе GET
+    if request.method == "GET":
+        form = UserRegistrationForm()
+        context["form"] = form
+        return render(request, 'pages/registration.html', context)
+    
+    # Получаем данные из формы и на их основе создаем нового пользователя
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("home")  
+        context["form"] = form
+        return render(request,'pages/registration.html', context)
+    
+    return HttpResponseNotAllowed("bad request method")
 
-def private(request):
-    snippets = Snippet.objects.filter(user=request.user)
-    context = {
-        'pagename': 'Просмотр сниппетов',
-        'snippets': snippets,
-        }
-    return render(request, 'pages/private.html', context)
+@login_required
+def comment_add(request):
+    if request.method =="POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            snippet_id = request.POST.get("snippet_id")
+            snippet = Snippet.objects.get(id=snippet_id)
+            comment = comment_form.save(commit=False)
+            comment.author = request.user
+            comment.snippet = snippetcomment.save()
+            return redirect(f'/snippet/{snippet_id}')
+    raise Http404

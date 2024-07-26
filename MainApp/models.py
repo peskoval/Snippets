@@ -3,13 +3,12 @@ from django.contrib.auth.models import User
 
 
 LANGS = (
-    ("py", "Python"),
-    ("js", "JavaScript"), 
-    ("html", "HTML"),
-    ("cpp", "CSS ++")
+    ("py", 'Python'),
+    ("js", "JavaScript"),
+    ("cpp", "C++"),
+    ("html", "HTML")
 )
 
-STATUS = ((0, "Приватный"), (1, "Публичный"))
 
 class Snippet(models.Model):
     name = models.CharField(max_length=100)
@@ -17,4 +16,13 @@ class Snippet(models.Model):
     code = models.TextField(max_length=5000)
     creation_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, blank=True, null=True)
-    status = models.BooleanField(default=False, choices=STATUS)
+    public = models.BooleanField(default=True)  # True = public, False = private
+
+    def __repr__(self):
+        return Snippet(f'{self.name}')
+
+class Comment(models.Model):
+    text = models.TextField(max_length=1000)
+    author = models.ForeignKey(to=User, blank=True, null=True, on_delete=models.CASCADE)
+    snippet = models.ForeignKey(to=Snippet, related_name="comments", on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(auto_now_add=True)
