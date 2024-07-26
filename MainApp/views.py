@@ -1,10 +1,9 @@
-
 from django.http import Http404, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from MainApp.models import Snippet
 from django.core.exceptions import ObjectDoesNotExist
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 
 
@@ -41,6 +40,7 @@ def add_snippet_page(request):
             if request.user.is_authenticated:
                 snippet.user = request.user 
                 snippet.save()
+                messages.success(request,"New snippet has created!")
             return redirect("snippets-list")  # GET /snippets/list
         return render(request,'pages/add_snippet.html', {'form': form})
 
@@ -58,13 +58,13 @@ def snippet_detail(request, snippet_id):
     context = {'pagename': 'Просмотр сниппета'}
     try:
         snippet = Snippet.objects.get(id=snippet_id)
-        form = CommentForm()
-        context = {"form": form}
     except ObjectDoesNotExist:
         return render(request, "pages/errors.html", context | {"error": f"Snippet with id={snippet_id} not found"})
     else:
+        comments_form = CommentForm()
         context["snippet"] = snippet
         context["type"] = "view"
+        context["comments_form"] = comments_form
         return render(request, "pages/snippet_detail.html", context)
 
 
@@ -98,7 +98,8 @@ def snippet_edit(request, snippet_id):
         snippet.code = data_form["code"]
         snippet.public = data_form.get("public", False)
         snippet.save()
-        return redirect("snippets-list")
+        messages.success(request,"Snippet has changed!")
+    return redirect("snippets-list")
 
 
 @login_required
@@ -106,18 +107,20 @@ def snippet_delete(request, snippet_id):
     if request.method == "GET" or request.method == "POST":
         snippet = get_object_or_404(Snippet.objects.filter(user=request.user), id=snippet_id)
         snippet.delete()
+        messages.info(request,"Snippet has deleted!")
     return redirect("snippets-list")
 
 
 def login(request):
+    from pprint import pprint
     if request.method == 'POST':
         username = request.POST.get("username")
         password = request.POST.get("password")
-        # print("username =", username)
-        # print("password =", password)
+        # print(request.META.get("REMOTE_ADDR")) # Доступ к META информации WSGIRequest(запроса)
         user = auth.authenticate(request, username=username, password=password)
         if user is not None:
             auth.login(request, user)
+            messages.success(request,f"{user.username.capitalize()} logged in!")
         else:
             # Return error message
             context = {
@@ -149,17 +152,19 @@ def create_user(request):
         context["form"] = form
         return render(request,'pages/registration.html', context)
     
-    return HttpResponseNotAllowed("bad request method")
+    return HttpResponseNotAllowed(["GET", "POST"])
+
 
 @login_required
-def comment_add(request):
-    if request.method =="POST":
+def comments_add(request):
+    if request.method == "POST":
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             snippet_id = request.POST.get("snippet_id")
             snippet = Snippet.objects.get(id=snippet_id)
             comment = comment_form.save(commit=False)
             comment.author = request.user
-            comment.snippet = snippetcomment.save()
-            return redirect(f'/snippet/{snippet_id}')
-    raise Http404
+            comment.snippet = snippet
+            comment.save()
+            return redirect("snippet-detail", snippet_id=snippet.id)
+    return HttpResponseNotAllowed(["POST"])

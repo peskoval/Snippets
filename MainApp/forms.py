@@ -1,9 +1,9 @@
 from django.forms import ModelForm, TextInput, Textarea
-from MainApp.models import Snippet
+from MainApp.models import Snippet, Comment
 from django.contrib.auth.models import User
 from django.forms import CharField, PasswordInput
 from django.core.exceptions import ValidationError
-from MainApp.models import Comment
+
 
 # Описание возможностей по настройке форм
 # https://docs.djangoproject.com/en/dev/ref/forms/widgets/#django.forms.Widget.attrs
@@ -13,7 +13,7 @@ class SnippetForm(ModelForm):
         model = Snippet
         # Описываем поля, которые будем заполнять в форме
         fields = ['name', 'lang', 'code', 'public']
-        labels = {'name': '', 'lang': "", "code": "", "public": ""}
+        labels = {'name': '', 'lang': "", "code": "", "public": "Public(checked) / Private(unchecked)"}
         widgets = {
           'name': TextInput(attrs={"class":"form-control", "style":'max-width: 300px;', 'placeholder': 'Название сниппета'}),
           'code': Textarea(attrs={
@@ -60,12 +60,17 @@ class UserRegistrationForm(ModelForm):
             user.save()
         return user
 
+
 class CommentForm(ModelForm):
     class Meta:
         model = Comment
-        fields = ["text"]
+        fields = ['text']
+        labels = {"text": ""}
         widgets = {
-          'text': Textarea(attrs={
-              'placeholder': 'Добавьте комментарий',
-              }),
+            "text": Textarea(
+                attrs={
+                    "class": "form-control", 
+                    "placeholder": "Комментарий для сниппета",
+                    "style":'max-width: 400px;',
+                    })
         }
